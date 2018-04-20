@@ -22,3 +22,16 @@ See: https://meowni.ca/font-style-matcher/
   font-family: Roboto, system-ui, BlinkMacSystemFont, -apple-system, sans-serif;
 }
 ```
+
+## Example Config
+
+```js
+{
+  stacks: {
+    ui: {
+      target: `Roboto`,
+      fallbacks: `system-ui, BlinkMacSystemFont, -apple-system, sans-serif`
+    }
+  }
+}
+```
