@@ -2,7 +2,7 @@ import * as postcss from "postcss";
 
 const defaults = {
   decl: `font-stack`,
-  classGenerator: target => `.has-${target}-font`,
+  classGenerator: target => `.has-${target.toLowerCase().replace(/\s+/g, '-')}-font`,
   stacks: {}
 };
 

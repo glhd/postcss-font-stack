@@ -18,7 +18,7 @@ See: https://meowni.ca/font-style-matcher/
 .btn {
   font-family: system-ui, BlinkMacSystemFont, -apple-system, sans-serif;
 }
-.has-Roboto-font .btn {
+.has-roboto-font .btn {
   font-family: Roboto, system-ui, BlinkMacSystemFont, -apple-system, sans-serif;
 }
 ```
