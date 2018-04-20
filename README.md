@@ -14,7 +14,7 @@ See: https://meowni.ca/font-style-matcher/
 
 ## Out
 
-```
+```css
 .btn {
   font-family: system-ui, BlinkMacSystemFont, -apple-system, sans-serif;
 }
