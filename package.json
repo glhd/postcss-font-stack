@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/glhd/postcss-font-stack",
   "dependencies": {
+    "fontfaceobserver": "^2.0.13",
     "postcss": "^6.0.16"
   },
   "devDependencies": {
