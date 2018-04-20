@@ -1,22 +1,14 @@
 import * as postcss from "postcss";
 
 const defaults = {
-  decl: "font-stack",
+  decl: `font-stack`,
   classGenerator: target => `.has-${target}-font`,
-  stacks: {
-    body: {
-      target: "exchange",
-      fallbacks: "Georgia, serif",
-      adjustments: {
-        letterSpacing: "0.1px",
-      },
-    }
-  }
+  stacks: {}
 };
 
 const defaultStack = {
-  target: "",
-  fallbacks: "",
+  target: ``,
+  fallbacks: ``,
   adjustments: {}
 };
 
@@ -28,11 +20,18 @@ const defaultAdjustments = {
   fontSize: 1,
 };
 
-function fontStackAtRule(parent, rule, options) {
-  const stackConfig = options.stacks[rule.value];
+const adjustments = {
+  letterSpacing: 'letter-spacing',
+  wordSpacing: 'word-spacing',
+  lineHeight: 'line-height',
+  fontWeight: 'font-weight',
+};
+
+function fontStackAtRule(rule, decl, options) {
+  const stackConfig = options.stacks[decl.value];
 
   if (!stackConfig) {
-    throw new Error(`Font stack "${rule.value}" is not configured.`);
+    throw new Error(`Font stack "${decl.value}" is not configured.`);
   }
 
   const stack = Object.assign({}, defaultStack, stackConfig);
@@ -40,28 +39,21 @@ function fontStackAtRule(parent, rule, options) {
 
   // Apply fallback font family
 
-  const fallbackRule = postcss.decl({
+  const fallbackDecl = postcss.decl({
     prop: 'font-family',
     value: stack.fallbacks,
   });
 
-  rule.replaceWith(fallbackRule);
+  decl.replaceWith(fallbackDecl);
 
   // Apply configured adjustments
-
-  const adjustments = {
-    letterSpacing: 'letter-spacing',
-    wordSpacing: 'word-spacing',
-    lineHeight: 'line-height',
-    fontWeight: 'font-weight',
-  };
 
   Object.keys(adjustments).forEach(adjustment => {
     if (null === stack.adjustments[adjustment]) {
       return;
     }
 
-    fallbackRule.after(postcss.decl({
+    fallbackDecl.after(postcss.decl({
       prop: adjustments[adjustment],
       value: stack.adjustments[adjustment],
     }));
@@ -70,7 +62,7 @@ function fontStackAtRule(parent, rule, options) {
   // Create rule for when font is loaded
 
   const loadedRule = postcss.rule({
-    selector: `${options.classGenerator(stack.target)} ${parent.selector}`,
+    selector: `${options.classGenerator(stack.target)} ${rule.selector}`,
   });
 
   loadedRule.append(postcss.decl({
@@ -93,7 +85,7 @@ function fontStackAtRule(parent, rule, options) {
 
   // Add rule
 
-  parent.after(loadedRule);
+  rule.after(loadedRule);
 }
 
 export default postcss.plugin(
