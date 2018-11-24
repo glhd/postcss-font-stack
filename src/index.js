@@ -2,7 +2,9 @@ import * as postcss from "postcss";
 
 const defaults = {
   decl: `font-stack`,
-  classGenerator: target => `.has-${target.toLowerCase().replace(/\s+/g, '-')}-font`,
+  loadingClass: 'wf-loading',
+  activeClass: 'wf-active',
+  inactiveClass: 'wf-inactive',
   stacks: {}
 };
 
@@ -37,14 +39,12 @@ function fontStackAtRule(rule, decl, options) {
   const stack = Object.assign({}, defaultStack, stackConfig);
   stack.adjustments = Object.assign({}, defaultAdjustments, stack.adjustments);
 
-  // Apply fallback font family
+  // Apply font-family declaration
 
-  const fallbackDecl = postcss.decl({
+  decl.replaceWith(postcss.decl({
     prop: 'font-family',
     value: stack.fallbacks,
-  });
-
-  decl.replaceWith(fallbackDecl);
+  }));
 
   // Apply configured adjustments
 
@@ -53,16 +53,20 @@ function fontStackAtRule(rule, decl, options) {
       return;
     }
 
-    fallbackDecl.after(postcss.decl({
+    rule.append(postcss.decl({
       prop: adjustments[adjustment],
-      value: stack.adjustments[adjustment],
+      value: `${stack.adjustments[adjustment]}`,
     }));
   });
 
   // Create rule for when font is loaded
 
   const loadedRule = postcss.rule({
-    selector: `${options.classGenerator(stack.target)} ${rule.selector}`,
+    selector: rule.selector
+      .replace(/\s*\n+\s*/g, ' ')
+      .split(',')
+      .map(selector => `.${options.activeClass} ${selector}`)
+      .join(',')
   });
 
   loadedRule.append(postcss.decl({
@@ -70,25 +74,10 @@ function fontStackAtRule(rule, decl, options) {
     value: `${stack.target}, ${stack.fallbacks}`,
   }));
 
-  // Reset adjustments when loaded
-
-  Object.keys(adjustments).forEach(adjustment => {
-    if (null === stack.adjustments[adjustment]) {
-      return;
-    }
-
-    loadedRule.append(postcss.decl({
-      prop: adjustments[adjustment],
-      value: 0,
-    }));
-  });
-
-  // Add rule
-
   rule.after(loadedRule);
 }
 
-export default postcss.plugin(
-  "postcss-font-stacks", 
-  (opts = defaults) => root => root.walkRules(rule => rule.walkDecls(opts.decl, at => fontStackAtRule(rule, at, opts)))
-);
+export default postcss.plugin("postcss-font-stacks", (config = {}) => {
+  const opts = Object.assign({}, defaults, config);
+  return root => root.walkRules(rule => rule.walkDecls(opts.decl, at => fontStackAtRule(rule, at, opts)));
+});

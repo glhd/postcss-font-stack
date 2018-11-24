@@ -1,14 +1,16 @@
 {
-  "name": "postcss-font-stack",
-  "version": "0.0.1",
+  "name": "@glhd/postcss-font-stack",
+  "version": "0.2.0",
   "description": "A PostCSS plugin to use configured font stacks with fallback adjustments",
+  "main": "dist/index.js",
   "keywords": [
     "postcss",
     "css",
     "postcss-plugin"
   ],
   "scripts": {
-    "build": "babel src -d dist"
+    "build": "babel src -d dist",
+    "prepublish": "npm run build"
   },
   "author": "Chris Morrell",
   "license": "MIT",
@@ -29,5 +31,8 @@
   },
   "eslintConfig": {
     "extends": "eslint-config-postcss/es5"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
