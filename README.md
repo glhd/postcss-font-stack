@@ -36,7 +36,9 @@ Use your font stack in anywhere in your CSS:
 }
 ```
 
-Finally, set up the [font face observer](https://fontfaceobserver.com/) for your target fonts:
+If you're using Typekit, everything else is set up for you. If not, check out
+the [font face observer](https://fontfaceobserver.com/) library, and set up something
+along the lines of:
 
 ```js
 const fontObserver = new FontFaceObserver(`Roboto`);
@@ -45,21 +47,17 @@ fontObserver.load().then(() => {
 });
 ```
 
-(This step should be more automated in the future.)
-
-Now, your outputted CSS will look something like this:
+Your final CSS will look something like this:
 
 ### Example Output
 
 ```css
-.btn {
+.wf-loading .btn, .wf-inactive .btn {
   font-family: Arial, sans-serif;
-  word-spacing: -0.009375rem;
   letter-spacing: -0.003125rem;
+  word-spacing: -0.009375rem;
 }
-.has-roboto-font .btn {
+.wf-active .btn {
   font-family: Roboto, Arial, sans-serif;
-  letter-spacing: 0;
-  word-spacing: 0;
 }
 ```

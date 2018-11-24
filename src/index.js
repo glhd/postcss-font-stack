@@ -29,7 +29,7 @@ const adjustments = {
   fontWeight: 'font-weight',
 };
 
-function fontStackAtRule(rule, decl, options) {
+function fontStackDecl(rule, decl, options) {
   const stackConfig = options.stacks[decl.value];
 
   if (!stackConfig) {
@@ -41,7 +41,18 @@ function fontStackAtRule(rule, decl, options) {
 
   // Apply font-family declaration
 
-  decl.replaceWith(postcss.decl({
+  decl.remove();
+
+  // Create rule for when font is loading
+
+  const loadingRule = postcss.rule({
+    selectors: [
+      ...rule.selectors.map(selector => `.${options.loadingClass} ${selector}`),
+      ...rule.selectors.map(selector => `.${options.inactiveClass} ${selector}`),
+    ]
+  });
+
+  loadingRule.append(postcss.decl({
     prop: 'font-family',
     value: stack.fallbacks,
   }));
@@ -53,20 +64,18 @@ function fontStackAtRule(rule, decl, options) {
       return;
     }
 
-    rule.append(postcss.decl({
+    loadingRule.append(postcss.decl({
       prop: adjustments[adjustment],
       value: `${stack.adjustments[adjustment]}`,
     }));
   });
 
+  rule.after(loadingRule);
+
   // Create rule for when font is loaded
 
   const loadedRule = postcss.rule({
-    selector: rule.selector
-      .replace(/\s*\n+\s*/g, ' ')
-      .split(',')
-      .map(selector => `.${options.activeClass} ${selector}`)
-      .join(',')
+    selectors: rule.selectors.map(selector => `.${options.activeClass} ${selector}`)
   });
 
   loadedRule.append(postcss.decl({
@@ -79,5 +88,5 @@ function fontStackAtRule(rule, decl, options) {
 
 export default postcss.plugin("postcss-font-stacks", (config = {}) => {
   const opts = Object.assign({}, defaults, config);
-  return root => root.walkRules(rule => rule.walkDecls(opts.decl, at => fontStackAtRule(rule, at, opts)));
+  return root => root.walkRules(rule => rule.walkDecls(opts.decl, decl => fontStackDecl(rule, decl, opts)));
 });
